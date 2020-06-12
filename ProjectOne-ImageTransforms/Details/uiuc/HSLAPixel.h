@@ -20,7 +20,6 @@ namespace uiuc {
       double s; // Saturation
       double l; // Lumination
       double a; // Alpha - Opacity
-
   };
 
 

@@ -7,14 +7,11 @@
 #include "ImageTransform.h"
 
 /* ******************
-(Begin multi-line comment...)
-
 Write your name and email address in the comment space here:
 
-Name:
-Email:
+Name: Sarvesh Thakur
+Email: marsar24@umd.edu
 
-(...end multi-line comment.)
 ******************** */
 
 using uiuc::PNG;
@@ -56,7 +53,7 @@ PNG grayscale(PNG image) {
  * For example, a pixel 3 pixels above and 4 pixels to the right of the center
  * is a total of `sqrt((3 * 3) + (4 * 4)) = sqrt(25) = 5` pixels away and
  * its luminance is decreased by 2.5% (0.975x its original value).  At a
- * distance over 160 pixels away, the luminance will always decreased by 80%.
+ * distance over 160 pixels away, the luminance will always be decreased by 80%.
  * 
  * The modified PNG is then returned.
  *
@@ -67,9 +64,18 @@ PNG grayscale(PNG image) {
  * @return The image with a spotlight.
  */
 PNG createSpotlight(PNG image, int centerX, int centerY) {
+    // Create a SpotLight
+    double euclideanDistance;
+    for (unsigned int x = 0; x < image.width(); x++){
+        for (unsigned int y = 0; y < image.height(); y++){
+            HSLAPixel & pixel = image.getPixel(x, y);
+            euclideanDistance = sqrt((x-centerX)*(x-centerX) +  (y-centerY)*(y-centerY));
+            if (euclideanDistance <= 160) pixel.l = (1-euclideanDistance * 5.0 / 1000)*pixel.l;
+            else pixel.l *= 0.2;
+        }
+    }
 
-  return image;
-  
+    return image;
 }
  
 
@@ -84,13 +90,25 @@ PNG createSpotlight(PNG image, int centerX, int centerY) {
  * @return The illinify'd image.
 **/
 PNG illinify(PNG image) {
+    /// Illinify an image.
+    for (unsigned x = 0; x < image.width(); x++) {
+        for (unsigned y = 0; y < image.height(); y++) {
+            HSLAPixel & pixel = image.getPixel(x, y);
+            // Check pixel h value lies closer to blue or orange
+            double blueClose = min(abs(pixel.h - 216), abs(216 + 360 - pixel.h));
+            double orangeClose = min(abs(pixel.h - 11), abs(11 + 360 - pixel.h));
 
-  return image;
+            if (blueClose < orangeClose) pixel.h = 216;
+            else pixel.h = 11;
+        }
+    }
+
+    return image;
 }
  
 
 /**
-* Returns an immge that has been watermarked by another image.
+* Returns an image that has been watermarked by another image.
 *
 * The luminance of every pixel of the second image is checked, if that
 * pixel's luminance is 1 (100%), then the pixel at the same location on
@@ -102,6 +120,18 @@ PNG illinify(PNG image) {
 * @return The watermarked image.
 */
 PNG watermark(PNG firstImage, PNG secondImage) {
+    ///
+    for (unsigned x = 0; x < secondImage.width(); x++){
+        for (unsigned y = 0; y < secondImage.height(); y++){
+            HSLAPixel & pixel = secondImage.getPixel(x, y);
+
+            HSLAPixel & pixelEdit = firstImage.getPixel(x, y);
+            if (pixel.l == 1) {
+                pixelEdit.l += 0.2;
+                if (pixelEdit.l > 1.0) pixelEdit.l = 1.0;
+            }
+        }
+    }
 
   return firstImage;
 }
